@@ -13,7 +13,6 @@ CREATE TABLE players
 id SERIAL,
 player_name varchar(255),
 wins int,
-loses int,
 matches int
 );
 

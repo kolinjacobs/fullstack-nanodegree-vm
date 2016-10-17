@@ -14,7 +14,9 @@ def deleteMatches():
     """Remove all the match records from the database."""
     DB = connect()
     c = DB.cursor()
+    #deletes all rows from the matches table
     c.execute("delete from matches;")
+    #sets the wins and matches column to 0 for all rows in the players table
     c.execute("UPDATE players SET wins = 0, matches = 0")
     DB.commit()
     DB.close()
@@ -22,6 +24,7 @@ def deletePlayers():
     """Remove all the player records from the database."""
     DB = connect()
     c = DB.cursor()
+    # deletes all rows from the players table
     c.execute("DELETE FROM players")
     DB.commit()
     c.close()
@@ -33,7 +36,7 @@ def countPlayers():
     c.execute("SELECT count(*) FROM players")
     result = c.fetchone()
     number = result[0]
-    #raise ValueError(number)
+    #returns the number of rows in the player table
     return int(number)
 
 def registerPlayer(name):
@@ -47,6 +50,7 @@ def registerPlayer(name):
     """
     DB = connect()
     c = DB.cursor()
+    #inserts a player into the player table
     c.execute("INSERT INTO players (id, player_name, wins, matches)"
               "VALUES (DEFAULT, %s, 0,0);",
               (name,))
@@ -68,8 +72,10 @@ def playerStandings():
     """
     DB = connect()
     c = DB.cursor()
+    #selects all players from the player table ordered by win
     c.execute("SELECT * FROM players ORDER BY wins DESC")
     players = []
+    #fills an array of players tuples and returns it
     for row in c.fetchall():
         player = (int(row[0]),str(row[1]),int(row[2]),int(row[3]))
         players.append(player)
@@ -89,6 +95,8 @@ def reportMatch(winner, loser):
     players = []
     winner_name = ""
     loser_name = ""
+    # fills an array of players tuples
+    #saves the name of the winer and loser to a string
     for row in c.fetchall():
         player = (int(row[0]),str(row[1]),int(row[2]),int(row[3]))
         players.append(player)
@@ -96,13 +104,15 @@ def reportMatch(winner, loser):
             winner_name = str(row[1])
         if int(row[0]) == loser:
             loser_name = str(row[1])
-
+    #increments matches column and wins column by one for the winner
     c.execute("UPDATE players SET wins = wins + 1, matches = matches + 1"
               "WHERE id = %s",
               (winner,))
+    #increments the matches column only for the loser
     c.execute("UPDATE players SET matches = matches + 1"
               "WHERE id = %s",
               (loser,))
+    #adds a match to the match table
     c.execute("INSERT INTO matches (id_one, player_one, id_two, player_two, winner)"
               "VALUES (%s, %s, %s,%s,%s);",
               (winner, winner_name, loser, loser_name, winner))
@@ -129,11 +139,13 @@ def swissPairings():
     c = DB.cursor()
     c.execute("SELECT * FROM players ORDER BY wins DESC")
     players = []
+    # fills an array of players tuples
     for row in c.fetchall():
         player = (int(row[0]),str(row[1]),int(row[2]),int(row[3]))
         players.append(player)
     matches = []
     matches_number = int(len(players)/2)
+    #fills an array of matches based on player wins
     for x in range(0, matches_number):
         match = (int(players[x*2][0]),players[x*2][1],int(players[(x*2)+1][0]),players[(x*2)+1][1])
         matches.append(match)
